@@ -14,6 +14,7 @@ public class SimonShapesScript : MonoBehaviour
 	
 	public List<Color> LightColors; //Red, Green, Blue, Yellow, Magenta, Cyan, Gray
 	public List<Material> ButtonColors; //Red, Green, Blue, Yellow, Magenta, Cyan, Gray
+	public List<Material> LitColors;
 	
 	public List<Light> Lights;
 	public List<MeshRenderer> ButtonRenderers;
@@ -143,11 +144,11 @@ public class SimonShapesScript : MonoBehaviour
 			}
 			else
 			{
-				StartCoroutine(ResumeFlash(_flashes));
-				_pressindex = 0;
 				Audio.PlaySoundAtTransform(Sounds[7].name, Buttons[i].transform);
 				DebugLog("That is incorrect, expected " + _stageAnswers[_stage][_pressindex]);
+				_pressindex = 0;
 				Module.HandleStrike();
+				StartCoroutine(ResumeFlash(_flashes));
 			}
 
 			return;
@@ -163,10 +164,15 @@ public class SimonShapesScript : MonoBehaviour
 		_possibleFinalShapes.RemoveAll(x => !x.Contains(i));
 		_buttons[i].Selected = true;
 		_buttons[i].Light.enabled = true;
+		_buttons[i].Renderer.material = LitColors[6];
 		if (_buttons.Count(x => x.Selected) == _possibleFinalShapes.First().Count)
 		{
+			_buttons.ForEach(x =>
+			{
+				x.Light.enabled = false;
+				x.Renderer.material = ButtonColors[6];
+			});
 			StartCoroutine(Solve());
-			_buttons.ForEach(x => x.Light.enabled = false);
 			Audio.PlaySoundAtTransform(Sounds[6].name, Buttons[i].transform);
 		}
 		else
@@ -182,6 +188,22 @@ public class SimonShapesScript : MonoBehaviour
 
 	private IEnumerator FlashCoroutine(List<List<int>> flashes)
 	{
+		foreach (var t in flashes.Last())
+		{
+			if (_audioPlaying)
+			{
+				Audio.PlaySoundAtTransform(Sounds[_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Sound].name, Buttons[t - 1].transform);
+			}
+			_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Light.enabled = true;
+			_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Renderer.material =
+				LitColors[(int)_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Color];
+			yield return new WaitForSeconds(.4f);
+			_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Light.enabled = false;
+			_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Renderer.material =
+				ButtonColors[(int)_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Color];
+			yield return new WaitForSeconds(.4f);
+		}
+		yield return new WaitForSeconds(1.2f);
 		while (true)
 		{
 			foreach (var t1 in flashes)
@@ -193,8 +215,12 @@ public class SimonShapesScript : MonoBehaviour
 						Audio.PlaySoundAtTransform(Sounds[_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Sound].name, Buttons[t - 1].transform);
 					}
 					_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Light.enabled = true;
+					_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Renderer.material =
+						LitColors[(int)_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Color];
 					yield return new WaitForSeconds(.4f);
 					_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Light.enabled = false;
+					_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Renderer.material =
+						ButtonColors[(int)_buttons.Where(x => x.Color != SimonShapesColor.Gray).ElementAt(t - 1).Color];
 					yield return new WaitForSeconds(.4f);
 				}
 
@@ -203,7 +229,7 @@ public class SimonShapesScript : MonoBehaviour
 					yield return new WaitForSeconds(.8f);
 				}
 			}
-			yield return new WaitForSeconds(1f);
+			yield return new WaitForSeconds(1.2f);
 		}
 	}
 
@@ -255,7 +281,7 @@ public class SimonShapesScript : MonoBehaviour
 		var fadeAmount = 0f;
 		var fadeDuration = 0.1f;
 		var renderers = _buttons.Where(x => x.Color != SimonShapesColor.Gray).Select(x => x.Renderer).ToList();
-		var color = new Color32(71, 71, 71, 255);
+		var color = new Color32(34, 34, 34, 138);
 		foreach (var l in _buttons.Select(x => x.Light))
 		{
 			l.color = LightColors[6];
@@ -270,6 +296,7 @@ public class SimonShapesScript : MonoBehaviour
 
 			yield return null;
 		}
+		renderers.ForEach(x => x.material = ButtonColors[6]);
 		_animating = false;
 	}
 
@@ -277,8 +304,6 @@ public class SimonShapesScript : MonoBehaviour
 	{
 		_animating = true;
 		var cycle = new List<int> {0, 1, 2, 5, 8, 7, 6, 3, 4};
-		var green = new Color32(0, 255, 0, 255);
-		var gray = new Color32(71, 71, 71, 255);
 		var renderers = _buttons.Select(x => x.Renderer).ToList();
 		var lights = _buttons.Select(x => x.Light).ToList();
 		foreach (var l in lights)
@@ -287,15 +312,15 @@ public class SimonShapesScript : MonoBehaviour
 		}
 		foreach (var t in cycle)
 		{
-			renderers[t].material.color = green;
 			lights[t].enabled = true;
+			_buttons[t].Renderer.material = LitColors[1];
 			yield return new WaitForSeconds(.07f);
 		}
 		
-		renderers.ForEach(x => x.material.color = gray);
 		lights.ForEach(x => x.enabled = false);
+		renderers.ForEach(x => x.material = ButtonColors[6]);
 		yield return new WaitForSeconds(.3f);
-		renderers.ForEach(x => x.material.color = green);
+		renderers.ForEach(x => x.material = LitColors[1]);
 		lights.ForEach(x => x.enabled = true);
 		Module.HandlePass();
 		_isSolved = true;
@@ -312,6 +337,7 @@ public class SimonShapesScript : MonoBehaviour
 		StopCoroutine(_flashRoutine);
 		_flashRoutine = null;
 		Lights.ForEach(x => x.enabled = false);
+		_buttons.ForEach(x => x.Renderer.material = ButtonColors[(int)x.Color]);
 	}
 
 	private void SetColorblind()
