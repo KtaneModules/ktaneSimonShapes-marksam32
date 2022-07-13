@@ -17,8 +17,7 @@ MonoBehaviour:
   description: "A pattern is a pattern is a pattern.\n\r\nCreated by: Vincology\nImpelemented
     by: Marksam32\r\n\r\nManual:\r\nPDF: https://ktane.timwi.de/PDF/Simon%20Shapes.pdf\nHTML:
     https://ktane.timwi.de/HTML/Simon%20Shapes.html\n\r\nModule id: SimonShapesModule\r\nGithub:
-    https://github.com/marksam32/ktaneSimonShapes\n\r\nIf you want to report any bugs
-    or typos in the manual or in the module, please contact me on discord: Marksam32#6669"
+    https://github.com/marksam32/ktaneSimonShapes"
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 565287bf707814e4cb679cde6fc98b9e, type: 3}
