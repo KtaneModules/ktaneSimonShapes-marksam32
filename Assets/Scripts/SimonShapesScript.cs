@@ -351,7 +351,7 @@ public class SimonShapesScript : MonoBehaviour
 	
 #pragma warning disable 414
 	private const string TwitchHelpMessage =
-		"Enable colorblind mode using !{0} colorblind. Press colors using !{0} press rgb c y m, where r is red, b is blue, g is green, c is cyan, y is yellow, and m is magenta. Press squares by their position using !{0} press a1 b2 c3, where the letter is the column and the number is the row.";
+		"Mute sound using !{0} mute. Enable colorblind mode using !{0} colorblind. Press colors using !{0} press rgb c y m, where r is red, b is blue, g is green, c is cyan, y is yellow, and m is magenta. Press squares by their position using !{0} press a1 b2 c3, where the letter is the column and the number is the row.";
 #pragma restore disable 414
 	
 	private IEnumerator ProcessTwitchCommand(string command)
