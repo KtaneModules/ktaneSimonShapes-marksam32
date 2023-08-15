@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 using UnityEngine;
@@ -130,6 +131,7 @@ public class SimonShapesScript : MonoBehaviour
 						StartCoroutine(FadeToGray());
 						ColorblindTextMeshes.ForEach(x => x.gameObject.SetActive(false));
 						DebugLog("Time for the shape!");
+						PrintPossibleShapes();
 						return;
 					}
 					_flashes.Add(_stages[_stage].Flashes);
@@ -157,16 +159,19 @@ public class SimonShapesScript : MonoBehaviour
 		if (!_possibleFinalShapes.Any(x => x.Contains(i)))
 		{
 			Module.HandleStrike();
+			DebugLog("You pressed {0}, that can not create a correct shape with the current configuration.", "ABC"[i % 3] + (Math.Abs(i / 3) + 1).ToString());
 			Audio.PlaySoundAtTransform(Sounds[7].name, Buttons[i].transform);
 			return;
 		}
 
 		_possibleFinalShapes.RemoveAll(x => !x.Contains(i));
+		DebugLog("Pressed {0}, that works.", "ABC"[i % 3] + (Math.Abs(i / 3) + 1).ToString());
 		_buttons[i].Selected = true;
 		_buttons[i].Light.enabled = true;
 		_buttons[i].Renderer.material = LitColors[6];
 		if (_buttons.Count(x => x.Selected) == _possibleFinalShapes.First().Count)
 		{
+			DebugLog("Module solved.");
 			_buttons.ForEach(x =>
 			{
 				x.Light.enabled = false;
@@ -265,6 +270,29 @@ public class SimonShapesScript : MonoBehaviour
 			buttons[i].Light.color = LightColors[colorIndex];
 			buttons[i].Renderer.material = ButtonColors[colorIndex];
 		}	
+	}
+
+	private void PrintPossibleShapes()
+	{
+		DebugLog("The possible shapes are:");
+		for (var i = 0; i < _possibleFinalShapes.Count; i++)
+		{
+			if (i != 0)
+			{
+				DebugLog("----------------------");
+			}
+			var grid = new [] { new[] { ".", ".", "." }, new[] { ".", ".", "." }, new[] { ".", ".", "." } };
+
+			foreach (var dot in _possibleFinalShapes[i])
+			{
+				grid[Math.Abs(dot / 3)][dot % 3] = "X";
+			}
+
+			foreach (var row in grid)
+			{
+				DebugLog(row.Join());
+			}
+		}
 	}
 
 	private IEnumerator ResumeFlash(List<List<int>> flashes)
